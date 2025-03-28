@@ -31,5 +31,19 @@ This will create a database in MongoDB called __infodisclosure__. Verify its pre
 Answer the following:
 
 1. Briefly explain the potential vulnerabilities in **insecure.ts** that can lead to a DoS attack.
+   - The insecure version lacks proper error handling - there's no try/catch block to handle database query errors.
+   - It doesn't implement any rate limiting, allowing unlimited requests in a short time period.
+   - The application directly uses unsanitized user input in database queries without validation.
+   - NoSQL injection vulnerabilities can be exploited to create complex queries that consume excessive server resources.
+
 2. Briefly explain how a malicious attacker can exploit them.
+   - An attacker can send a large number of requests in rapid succession to overwhelm the server.
+   - They can use NoSQL injection with operators like `$ne` to create queries that return large result sets.
+   - Without rate limiting, the attacker can automate these requests to continuously consume server resources.
+   - The lack of error handling means that malformed queries can crash the server entirely rather than being gracefully handled.
+
 3. Briefly explain the defensive techniques used in **secure.ts** to prevent the DoS vulnerability?
+   - Implementation of rate limiting using the `express-rate-limit` middleware that restricts each IP to 1 request per 5 seconds.
+   - Proper error handling with try/catch blocks to prevent server crashes when database queries fail.
+   - Returning appropriate error messages without exposing sensitive information.
+   - The rate limiter returns a "Server is busy" message when limits are exceeded, maintaining availability for other users.
